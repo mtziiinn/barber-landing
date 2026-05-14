@@ -24,9 +24,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Loader2, Users, Search, Mail, Phone, Plus } from "lucide-react";
+import {
+  Loader2,
+  Users,
+  Search,
+  Mail,
+  Phone,
+  Plus,
+  ArrowLeft,
+} from "lucide-react";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { v4 as uuidv4 } from "uuid";
 
@@ -82,10 +89,11 @@ export default function ClientsPage() {
 
   async function handleCreateClient(e: React.FormEvent) {
     e.preventDefault();
+    if (!supabase) return;
     setIsCreating(true);
 
     try {
-      const { error } = await supabase!.from("profiles").insert({
+      const { error } = await supabase.from("profiles").insert({
         id: uuidv4(),
         full_name: newClient.full_name,
         email: newClient.email,
@@ -129,9 +137,11 @@ export default function ClientsPage() {
     );
   }
 
+  const isAdmin = profile?.role === "admin" || profile?.role === "barber";
+
   return (
     <div className="min-h-screen bg-background">
-      <DashboardHeader profile={profile} />
+      <DashboardHeader profile={profile} isAdmin={isAdmin} />
 
       <main className="container mx-auto px-4 py-8">
         <Link

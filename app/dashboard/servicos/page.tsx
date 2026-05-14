@@ -3,12 +3,31 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Loader2, Scissors, Plus, Pencil, Trash2 } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Loader2,
+  Scissors,
+  Plus,
+  Pencil,
+  Trash2,
+  ArrowLeft,
+} from "lucide-react";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 import { formatPrice } from "@/lib/types";
 
 export default function ServicesPage() {
@@ -21,12 +40,18 @@ export default function ServicesPage() {
     async function getData() {
       if (!supabase) return;
 
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (user) {
-        const { data: profileData } = await supabase.from("profiles").select("*").eq("id", user.id).single();
+        const { data: profileData } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", user.id)
+          .single();
         setProfile(profileData);
 
-        if (profileData?.role === 'admin' || profileData?.role === 'barber') {
+        if (profileData?.role === "admin" || profileData?.role === "barber") {
           const { data } = await supabase
             .from("services")
             .select("*")
@@ -47,9 +72,11 @@ export default function ServicesPage() {
     );
   }
 
+  const isAdmin = profile?.role === "admin" || profile?.role === "barber";
+
   return (
     <div className="min-h-screen bg-background">
-      <DashboardHeader profile={profile} />
+      <DashboardHeader profile={profile} isAdmin={isAdmin} />
 
       <main className="container mx-auto px-4 py-8">
         <Link
@@ -67,7 +94,9 @@ export default function ServicesPage() {
             </div>
             <div>
               <h1 className="text-3xl font-bold tracking-tight">Serviços</h1>
-              <p className="text-muted-foreground">Gerencie o catálogo de serviços e preços</p>
+              <p className="text-muted-foreground">
+                Gerencie o catálogo de serviços e preços
+              </p>
             </div>
           </div>
 
@@ -94,7 +123,9 @@ export default function ServicesPage() {
                     <TableCell>
                       <div>
                         <p className="font-medium">{service.name}</p>
-                        <p className="text-xs text-muted-foreground line-clamp-1">{service.description}</p>
+                        <p className="text-xs text-muted-foreground line-clamp-1">
+                          {service.description}
+                        </p>
                       </div>
                     </TableCell>
                     <TableCell>{service.duration_minutes} min</TableCell>
@@ -106,7 +137,11 @@ export default function ServicesPage() {
                         <Button variant="ghost" size="icon" className="h-8 w-8">
                           <Pencil className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-destructive"
+                        >
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
@@ -115,7 +150,10 @@ export default function ServicesPage() {
                 ))}
                 {services.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
+                    <TableCell
+                      colSpan={4}
+                      className="h-24 text-center text-muted-foreground"
+                    >
                       Nenhum serviço cadastrado.
                     </TableCell>
                   </TableRow>

@@ -3,13 +3,18 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-import { Loader2, Settings, Bell, Lock, Palette } from "lucide-react";
+import { Loader2, Settings, Bell, Lock, ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export default function SettingsPage() {
@@ -22,7 +27,9 @@ export default function SettingsPage() {
     async function getProfile() {
       if (!supabase) return;
 
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (user) {
         const { data } = await supabase
           .from("profiles")
@@ -51,9 +58,11 @@ export default function SettingsPage() {
     );
   }
 
+  const isAdmin = profile?.role === "admin" || profile?.role === "barber";
+
   return (
     <div className="min-h-screen bg-background">
-      <DashboardHeader profile={profile} />
+      <DashboardHeader profile={profile} isAdmin={isAdmin} />
 
       <main className="container mx-auto px-4 py-8 max-w-2xl">
         <Link
@@ -70,8 +79,12 @@ export default function SettingsPage() {
               <Settings className="w-6 h-6 text-primary" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">Configurações</h1>
-              <p className="text-muted-foreground">Gerencie suas preferências e conta</p>
+              <h1 className="text-3xl font-bold tracking-tight">
+                Configurações
+              </h1>
+              <p className="text-muted-foreground">
+                Gerencie suas preferências e conta
+              </p>
             </div>
           </div>
 
@@ -81,20 +94,26 @@ export default function SettingsPage() {
                 <Bell className="w-5 h-5 text-primary" />
                 <CardTitle>Notificações</CardTitle>
               </div>
-              <CardDescription>Escolha como você deseja ser notificado sobre seus agendamentos</CardDescription>
+              <CardDescription>
+                Escolha como você deseja ser notificado sobre seus agendamentos
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
                   <Label>Notificações por Email</Label>
-                  <p className="text-sm text-muted-foreground">Receba lembretes e confirmações por email</p>
+                  <p className="text-sm text-muted-foreground">
+                    Receba lembretes e confirmações por email
+                  </p>
                 </div>
                 <Switch defaultChecked />
               </div>
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
                   <Label>Notificações por SMS</Label>
-                  <p className="text-sm text-muted-foreground">Receba alertas importantes via SMS</p>
+                  <p className="text-sm text-muted-foreground">
+                    Receba alertas importantes via SMS
+                  </p>
                 </div>
                 <Switch defaultChecked />
               </div>
@@ -107,21 +126,29 @@ export default function SettingsPage() {
                 <Lock className="w-5 h-5 text-primary" />
                 <CardTitle>Segurança</CardTitle>
               </div>
-              <CardDescription>Proteja sua conta e dados pessoais</CardDescription>
+              <CardDescription>
+                Proteja sua conta e dados pessoais
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
                   <Label>Autenticação em duas etapas</Label>
-                  <p className="text-sm text-muted-foreground">Adicione uma camada extra de segurança</p>
+                  <p className="text-sm text-muted-foreground">
+                    Adicione uma camada extra de segurança
+                  </p>
                 </div>
                 <Switch />
               </div>
-              <Button variant="outline" className="w-full">Alterar Senha</Button>
+              <Button variant="outline" className="w-full">
+                Alterar Senha
+              </Button>
             </CardContent>
           </Card>
 
-          <Button onClick={handleSave} className="w-full neon-border">Salvar Preferências</Button>
+          <Button onClick={handleSave} className="w-full neon-border">
+            Salvar Preferências
+          </Button>
         </div>
       </main>
     </div>

@@ -6,11 +6,16 @@ import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, User } from "lucide-react";
+import { Loader2, User, ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 
 export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
@@ -23,7 +28,9 @@ export default function ProfilePage() {
     async function getProfile() {
       if (!supabase) return;
 
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (user) {
         const { data } = await supabase
           .from("profiles")
@@ -39,9 +46,10 @@ export default function ProfilePage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!supabase || !profile) return;
     setSaving(true);
 
-    const { error } = await supabase!
+    const { error } = await supabase
       .from("profiles")
       .update({
         full_name: profile.full_name,
@@ -72,9 +80,11 @@ export default function ProfilePage() {
     );
   }
 
+  const isAdmin = profile?.role === "admin" || profile?.role === "barber";
+
   return (
     <div className="min-h-screen bg-background">
-      <DashboardHeader profile={profile} />
+      <DashboardHeader profile={profile} isAdmin={isAdmin} />
 
       <main className="container mx-auto px-4 py-8 max-w-2xl">
         <Link
@@ -93,7 +103,9 @@ export default function ProfilePage() {
               </div>
               <div>
                 <CardTitle className="text-2xl">Meu Perfil</CardTitle>
-                <CardDescription>Gerencie suas informações pessoais</CardDescription>
+                <CardDescription>
+                  Gerencie suas informações pessoais
+                </CardDescription>
               </div>
             </div>
           </CardHeader>
@@ -114,7 +126,9 @@ export default function ProfilePage() {
                 <Input
                   id="full_name"
                   value={profile?.full_name || ""}
-                  onChange={(e) => setProfile({ ...profile, full_name: e.target.value })}
+                  onChange={(e) =>
+                    setProfile({ ...profile, full_name: e.target.value })
+                  }
                   placeholder="Seu nome"
                   required
                 />
@@ -125,12 +139,18 @@ export default function ProfilePage() {
                 <Input
                   id="phone"
                   value={profile?.phone || ""}
-                  onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
+                  onChange={(e) =>
+                    setProfile({ ...profile, phone: e.target.value })
+                  }
                   placeholder="(00) 00000-0000"
                 />
               </div>
 
-              <Button type="submit" className="w-full neon-border" disabled={saving}>
+              <Button
+                type="submit"
+                className="w-full neon-border"
+                disabled={saving}
+              >
                 {saving ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />

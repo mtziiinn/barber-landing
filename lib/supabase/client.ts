@@ -1,1 +1,21 @@
-'use client'; import { createBrowserClient } from '@supabase/ssr'; export function createClient() { const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL; const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY; if (!supabaseUrl || !supabaseAnonKey) { console.error('Supabase environment variables are missing!'); return null; } return createBrowserClient(supabaseUrl, supabaseAnonKey); }
+"use client";
+
+import { createBrowserClient } from "@supabase/ssr";
+
+export function createClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.error("Supabase environment variables are missing!");
+    return null;
+  }
+
+  return createBrowserClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+    },
+  });
+}
