@@ -1,15 +1,1 @@
-import "server-only"
-import Stripe from "stripe"
-
-if (!process.env.STRIPE_SECRET_KEY) {
-  console.warn("[v0] STRIPE_SECRET_KEY not set - payments will not work")
-}
-
-export function getStripeClient() {
-  const key = process.env.STRIPE_SECRET_KEY || "sk_test_placeholder"
-  return new Stripe(key, {
-    apiVersion: "2024-12-15.acacia",
-  })
-}
-
-export const stripe = getStripeClient()
+import Stripe from 'stripe'; export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2025-01-27.acacia' as any, typescript: true, });
