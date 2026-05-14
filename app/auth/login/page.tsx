@@ -1,2 +1,143 @@
-"use client"; import Link from 'next/link'; import { useRouter } from 'next/navigation'; import { useState, FormEvent } from 'react'; import { createClient } from '@/lib/supabase/client'; import { Button } from '@/components/ui/button'; import { Input } from '@/components/ui/input'; import { Label } from '@/components/ui/label'; import { Scissors, ArrowLeft, Loader2 } from 'lucide-react'; export default function LoginPage() { const router = useRouter(); const [email, setEmail] = useState(''); const [password, setPassword] = useState(''); const [error, setError] = useState<string | null>(null); const [loading, setLoading] = useState(false); async function handleSubmit(e) { e.preventDefault(); setError(null); setLoading(true); try { const supabase = createClient(); if (!supabase) { setError('Erro de configuracao'); return; } const { error: signInError } = await supabase.auth.signInWithPassword({ email, password, }); if (signInError) { setError('f����zxZ�w(�����&WGW&��&�WFW"�W6��r�F6�&�&Br��&�WFW"�&Vg&W6�����6F6��W'"��6WDW'&�"�tW'&���W7W&F�r���f���ǒ�6WD��F��r�f�6R����&WGW&���F�b6�74��S�v֖�և67&VV�f�W��FV�2�6V�FW"�W7F�g��6V�FW"ӂs��F�b6�74��S�wr�gV�����r��Bs��F�b6�74��S�vff�W��FV�2�6V�FW"v�"�"ӂs��66�76�'26�74��S�wr�b��bFW�B�&��'�r���7�6�74��S�wFW�B׆�f��B�&��Bs�dDU���S��7����F�c��f�&���7V&֗C׶��F�U7V&֗G�6�74��S�w76Rג�bs��W'&�"bb�F�b6�74��S�w�B&r�FW7G'V7F�fR�FW�B�FW7G'V7F�fRFW�B�6�&�V�FVB��rs�W'&�'���F�c���F�b6�74��S�w76Rג�"s���&V��V������&V��Ė�WBG�S�vV���rf�VS׶V������6��vSײ�R���6WDV��R�F&vWB�f�VR��&WV�&VB����F�c��F�b6�74��S�w76Rג�"s���&V��6V����&V��Ė�WBG�S�w77v�&Brf�VS׷77v�&G���6��vSײ�R���6WE77v�&B�R�F&vWB�f�VR��&WV�&VB����F�c��'WGF��G�S�w7V&֗Br6�74��S�wr�gV��rF�6&�VC׶��F��w�����F��r�tV�G&�F����r�tV�G&"w���'WGF�����f�&���6�74��S�v�BӂFW�B�6V�FW"FW�B�6�s���FV�V�6��F��Ɩ��&Vc�r�WF��6�v��Wr6�74��S�wFW�B��[X\�IϐܚX\��۝O�[�ψ���]���]��
-N�
+"use client";
+
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState, FormEvent } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Scissors, ArrowLeft, Loader2 } from "lucide-react";
+
+export default function LoginPage() {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+
+    try {
+      const supabase = createClient();
+      if (!supabase) {
+        setError("Erro de configuração");
+        return;
+      }
+
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (signInError) {
+        setError(signInError.message);
+        return;
+      }
+
+      router.push("/dashboard");
+      router.refresh();
+    } catch (err) {
+      setError("Erro inesperado ao fazer login");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-background">
+      <div className="w-full max-w-md space-y-8">
+        <div className="flex flex-col items-center text-center">
+          <Link
+            href="/"
+            className="flex items-center gap-2 mb-8 text-muted-foreground hover:text-primary transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Voltar para home</span>
+          </Link>
+
+          <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-4">
+            <Scissors className="w-8 h-8 text-primary" />
+          </div>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Bem-vindo de volta
+          </h1>
+          <p className="text-muted-foreground mt-2">
+            Entre na sua conta para gerenciar seus agendamentos
+          </p>
+        </div>
+
+        <div className="bg-card border border-border p-8 rounded-2xl shadow-lg">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {error && (
+              <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm">
+                {error}
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="seu@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                disabled={loading}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">Senha</Label>
+                <Link href="#" className="text-sm text-primary hover:underline">
+                  Esqueceu a senha?
+                </Link>
+              </div>
+              <Input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                disabled={loading}
+              />
+            </div>
+
+            <Button
+              type="submit"
+              className="w-full neon-border"
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Entrando...
+                </>
+              ) : (
+                "Entrar"
+              )}
+            </Button>
+          </form>
+
+          <div className="mt-8 pt-6 border-t border-border text-center">
+            <p className="text-sm text-muted-foreground">
+              Não tem uma conta?{" "}
+              <Link
+                href="/auth/sign-up"
+                className="text-primary font-medium hover:underline"
+              >
+                Criar conta
+              </Link>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

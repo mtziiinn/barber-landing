@@ -1,1 +1,94 @@
-import { createClient } from '@/lib/supabase/server'; import { NextResponse } from 'next/server'; import Stripe from 'stripe'; const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2025-01-27.acacia' as any }); export async function POST(req) { try { const { serviceId, barberId, date, time } = await req.json(); const supabase = await createClient(); if (!supabase) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 }); const { data: { user } } = await supabase.auth.getUser(); if (!user) return NextResponse.json({ error: 'Unautorized' }, { status: 401 }); const { data: service } = await supabase.from('services').select('*').eq('id', serviceId).single(); const { data: appointment } = await supabase.from('appointments').insert({ client_id: user.id, barber_id: barberId, service_id: serviceId, appointment_date: date, appointment_time: time, status: 'pending', payment_status: 'pending' }).select().single(); const origin = req.headers.get('origin'); const session = await stripe.checkout.sessions.create({ payment_method_types: ['card'], line_items: [{ price_data: { currency: 'brl', product_data: { name: service.name }, unit_amount: service.price_cents }, quantity: 1 }], mode: 'payment', success_url: `${origin}/checkout/succes?session_id={CHECKOUT_SESSION_ID}`, cancel_url: `${origin}/checkout/cancel`, metadata: { appointmentId: appointment.id } }); return NextResponse.json({ sessionId: session.id, url: session.url }); } catch (error) { return NextResponse.json({ error: error.message }K��]\ΈLJN�H
+import { createClient } from "@/lib/supabase/server";
+import { NextResponse } from "next/server";
+import { preference } from "@/lib/mercadopago";
+
+export async function POST(req: Request) {
+  try {
+    const { serviceId, barberId, date, time } = await req.json();
+    const supabase = await createClient();
+
+    if (!supabase)
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user)
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    // Fetch service details
+    const { data: service } = await supabase
+      .from("services")
+      .select("*")
+      .eq("id", serviceId)
+      .single();
+
+    if (!service) {
+      return NextResponse.json(
+        { error: "Serviço não encontrado" },
+        { status: 404 },
+      );
+    }
+
+    // Create appointment in pending state
+    const { data: appointment, error: appointmentError } = await supabase
+      .from("appointments")
+      .insert({
+        client_id: user.id,
+        barber_id: barberId,
+        service_id: serviceId,
+        appointment_date: date,
+        appointment_time: time,
+        status: "pending",
+        payment_status: "pending",
+      })
+      .select()
+      .single();
+
+    if (appointmentError) {
+      return NextResponse.json(
+        { error: "Erro ao criar agendamento" },
+        { status: 500 },
+      );
+    }
+
+    const origin = req.headers.get("origin");
+
+    // Create Mercado Pago Preference
+    const response = await preference.create({
+      body: {
+        items: [
+          {
+            id: service.id,
+            title: service.name,
+            quantity: 1,
+            unit_price: service.price_cents / 100, // Mercado Pago uses decimal values
+            currency_id: "BRL",
+          },
+        ],
+        back_urls: {
+          success: `${origin}/checkout/success`,
+          failure: `${origin}/checkout/cancel`,
+          pending: `${origin}/checkout/success`,
+        },
+        auto_return: "approved",
+        metadata: {
+          appointment_id: appointment.id,
+          user_id: user.id,
+        },
+        external_reference: appointment.id,
+      },
+    });
+
+    return NextResponse.json({
+      id: response.id,
+      url: response.init_point, // URL to redirect user to Mercado Pago checkout
+    });
+  } catch (error) {
+    console.error("Mercado Pago Error:", error);
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Unknown error" },
+      { status: 500 },
+    );
+  }
+}
