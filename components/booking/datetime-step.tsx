@@ -219,7 +219,7 @@ export function DateTimeStep({
               ))}
             </div>
           ) : (
-            <div className="flex items-center justify-center h-[200px] bg-muted/30 rounded-xl">
+            <div className="flex items-center justify-center h-50 bg-muted/30 rounded-xl">
               <p className="text-muted-foreground text-sm">
                 Escolha uma data no calendario
               </p>
