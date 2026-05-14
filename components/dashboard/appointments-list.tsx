@@ -1,73 +1,130 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { createClient } from "@/lib/supabase/client"
-import { Appointment, formatPrice, formatTime } from "@/lib/types"
-import { Button } from "@/components/ui/button"
-import { Calendar, Clock, User, Check, X, MoreVertical, Loader2 } from "lucide-react"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
+import { Appointment, formatPrice, formatTime } from "@/lib/types";
+import { Button } from "@/components/ui/button";
+import {
+  Calendar,
+  Clock,
+  User,
+  Check,
+  X,
+  MoreVertical,
+  Loader2,
+  DollarSign,
+} from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 
 interface AppointmentsListProps {
-  appointments: Appointment[]
-  isAdmin: boolean
+  appointments: Appointment[];
+  isAdmin: boolean;
 }
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   pending: { label: "Pendente", color: "bg-yellow-500/20 text-yellow-500" },
   confirmed: { label: "Confirmado", color: "bg-primary/20 text-primary" },
   completed: { label: "Concluido", color: "bg-green-500/20 text-green-500" },
-  cancelled: { label: "Cancelado", color: "bg-destructive/20 text-destructive" },
-}
+  cancelled: {
+    label: "Cancelado",
+    color: "bg-destructive/20 text-destructive",
+  },
+};
 
 const PAYMENT_LABELS: Record<string, { label: string; color: string }> = {
   pending: { label: "Aguardando", color: "text-yellow-500" },
   paid_online: { label: "Pago Online", color: "text-green-500" },
   paid_cash: { label: "Pago Local", color: "text-green-500" },
   refunded: { label: "Reembolsado", color: "text-muted-foreground" },
-}
+};
 
-export function AppointmentsList({ appointments, isAdmin }: AppointmentsListProps) {
-  const router = useRouter()
-  const [loading, setLoading] = useState<string | null>(null)
+export function AppointmentsList({
+  appointments,
+  isAdmin,
+}: AppointmentsListProps) {
+  const router = useRouter();
+  const { toast } = useToast();
+  const [loading, setLoading] = useState<string | null>(null);
 
   async function updateStatus(appointmentId: string, status: string) {
-    setLoading(appointmentId)
-    const supabase = createClient()
-    
-    await supabase
-      .from("appointments")
-      .update({ status, updated_at: new Date().toISOString() })
-      .eq("id", appointmentId)
+    setLoading(appointmentId);
+    try {
+      const supabase = createClient();
+      if (!supabase) throw new Error("Erro ao conectar ao banco");
 
-    router.refresh()
-    setLoading(null)
+      const { error } = await supabase
+        .from("appointments")
+        .update({ status, updated_at: new Date().toISOString() })
+        .eq("id", appointmentId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Status atualizado",
+        description: `O agendamento foi marcado como ${STATUS_LABELS[status]?.label.toLowerCase()}.`,
+      });
+
+      router.refresh();
+    } catch (error: any) {
+      toast({
+        title: "Erro ao atualizar",
+        description: error.message || "Tente novamente mais tarde.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(null);
+    }
   }
 
-  async function updatePaymentStatus(appointmentId: string, paymentStatus: string) {
-    setLoading(appointmentId)
-    const supabase = createClient()
-    
-    await supabase
-      .from("appointments")
-      .update({ payment_status: paymentStatus, updated_at: new Date().toISOString() })
-      .eq("id", appointmentId)
+  async function updatePaymentStatus(
+    appointmentId: string,
+    paymentStatus: string,
+  ) {
+    setLoading(appointmentId);
+    try {
+      const supabase = createClient();
+      if (!supabase) throw new Error("Erro ao conectar ao banco");
 
-    router.refresh()
-    setLoading(null)
+      const { error } = await supabase
+        .from("appointments")
+        .update({
+          payment_status: paymentStatus,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", appointmentId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Pagamento atualizado",
+        description: "O status de pagamento foi alterado com sucesso.",
+      });
+
+      router.refresh();
+    } catch (error: any) {
+      toast({
+        title: "Erro ao atualizar",
+        description: error.message || "Tente novamente mais tarde.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(null);
+    }
   }
 
   const upcomingAppointments = appointments.filter(
-    (a) => a.status !== "cancelled" && a.status !== "completed"
-  )
+    (a) => a.status !== "cancelled" && a.status !== "completed",
+  );
   const pastAppointments = appointments.filter(
-    (a) => a.status === "cancelled" || a.status === "completed"
-  )
+    (a) => a.status === "cancelled" || a.status === "completed",
+  );
 
   return (
     <div className="bg-card border border-border rounded-xl">
@@ -128,7 +185,7 @@ export function AppointmentsList({ appointments, isAdmin }: AppointmentsListProp
         </div>
       )}
     </div>
-  )
+  );
 }
 
 function AppointmentCard({
@@ -138,28 +195,29 @@ function AppointmentCard({
   onUpdateStatus,
   onUpdatePayment,
 }: {
-  appointment: Appointment
-  isAdmin: boolean
-  loading: boolean
-  onUpdateStatus: (id: string, status: string) => void
-  onUpdatePayment: (id: string, status: string) => void
+  appointment: Appointment;
+  isAdmin: boolean;
+  loading: boolean;
+  onUpdateStatus: (id: string, status: string) => void;
+  onUpdatePayment: (id: string, status: string) => void;
 }) {
-  const status = STATUS_LABELS[appointment.status] || STATUS_LABELS.pending
-  const payment = PAYMENT_LABELS[appointment.payment_status] || PAYMENT_LABELS.pending
+  const status = STATUS_LABELS[appointment.status] || STATUS_LABELS.pending;
+  const payment =
+    PAYMENT_LABELS[appointment.payment_status] || PAYMENT_LABELS.pending;
 
-  const date = new Date(appointment.appointment_date + "T00:00:00")
+  const date = new Date(appointment.appointment_date + "T00:00:00");
 
   return (
     <div className="p-4 hover:bg-muted/30 transition-colors">
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-2">
-            <span className={`px-2 py-0.5 text-xs font-medium rounded ${status.color}`}>
+            <span
+              className={`px-2 py-0.5 text-xs font-medium rounded ${status.color}`}
+            >
               {status.label}
             </span>
-            <span className={`text-xs ${payment.color}`}>
-              {payment.label}
-            </span>
+            <span className={`text-xs ${payment.color}`}>{payment.label}</span>
           </div>
 
           <h3 className="font-bold truncate">
@@ -196,68 +254,62 @@ function AppointmentCard({
             {formatPrice(appointment.service?.price_cents || 0)}
           </span>
 
-          {isAdmin && appointment.status !== "cancelled" && appointment.status !== "completed" && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" disabled={loading}>
-                  {loading ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <MoreVertical className="w-4 h-4" />
+          {isAdmin &&
+            appointment.status !== "cancelled" &&
+            appointment.status !== "completed" && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" disabled={loading}>
+                    {loading ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <MoreVertical className="w-4 h-4" />
+                    )}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {appointment.status === "pending" && (
+                    <DropdownMenuItem
+                      onClick={() =>
+                        onUpdateStatus(appointment.id, "confirmed")
+                      }
+                    >
+                      <Check className="w-4 h-4 mr-2" />
+                      Confirmar
+                    </DropdownMenuItem>
                   )}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                {appointment.status === "pending" && (
-                  <DropdownMenuItem onClick={() => onUpdateStatus(appointment.id, "confirmed")}>
-                    <Check className="w-4 h-4 mr-2" />
-                    Confirmar
+                  {appointment.status === "confirmed" && (
+                    <DropdownMenuItem
+                      onClick={() =>
+                        onUpdateStatus(appointment.id, "completed")
+                      }
+                    >
+                      <Check className="w-4 h-4 mr-2" />
+                      Concluir
+                    </DropdownMenuItem>
+                  )}
+                  {appointment.payment_status === "pending" && (
+                    <DropdownMenuItem
+                      onClick={() =>
+                        onUpdatePayment(appointment.id, "paid_cash")
+                      }
+                    >
+                      <DollarSign className="w-4 h-4 mr-2" />
+                      Marcar como Pago
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem
+                    onClick={() => onUpdateStatus(appointment.id, "cancelled")}
+                    className="text-destructive focus:text-destructive"
+                  >
+                    <X className="w-4 h-4 mr-2" />
+                    Cancelar
                   </DropdownMenuItem>
-                )}
-                {appointment.status === "confirmed" && (
-                  <DropdownMenuItem onClick={() => onUpdateStatus(appointment.id, "completed")}>
-                    <Check className="w-4 h-4 mr-2" />
-                    Concluir
-                  </DropdownMenuItem>
-                )}
-                {appointment.payment_status === "pending" && (
-                  <DropdownMenuItem onClick={() => onUpdatePayment(appointment.id, "paid_cash")}>
-                    <DollarSign className="w-4 h-4 mr-2" />
-                    Marcar como Pago
-                  </DropdownMenuItem>
-                )}
-                <DropdownMenuItem 
-                  onClick={() => onUpdateStatus(appointment.id, "cancelled")}
-                  className="text-destructive focus:text-destructive"
-                >
-                  <X className="w-4 h-4 mr-2" />
-                  Cancelar
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
         </div>
       </div>
     </div>
-  )
-}
-
-function DollarSign(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      {...props}
-    >
-      <line x1="12" x2="12" y1="2" y2="22" />
-      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-    </svg>
-  )
+  );
 }
