@@ -1,43 +1,55 @@
-import { createClient } from "@/lib/supabase/server"
-import { Instagram, Award } from "lucide-react"
+import { createClient } from "@/lib/supabase/server";
+import { Instagram, Award } from "lucide-react";
 
 const fallbackBarbers = [
   { id: "1", name: "Joao Silva", specialties: ["Degrade", "Barba"] },
-  { id: "2", name: "Pedro Santos", specialties: ["Corte Classico", "Sobrancelha"] },
-  { id: "3", name: "Lucas Oliveira", specialties: ["Pigmentacao", "Degrade", "Barba"] },
-]
+  {
+    id: "2",
+    name: "Pedro Santos",
+    specialties: ["Corte Classico", "Sobrancelha"],
+  },
+  {
+    id: "3",
+    name: "Lucas Oliveira",
+    specialties: ["Pigmentacao", "Degrade", "Barba"],
+  },
+];
 
 async function getBarbers() {
   try {
-    const supabase = await createClient()
+    const supabase = await createClient();
+    if (!supabase) return fallbackBarbers;
+
     const { data } = await supabase
       .from("barbers")
       .select("*")
-      .eq("is_active", true)
-    
-    return data || fallbackBarbers
+      .eq("is_active", true);
+
+    return data || fallbackBarbers;
   } catch {
-    return fallbackBarbers
+    return fallbackBarbers;
   }
 }
 
 export async function TeamSection() {
-  const barbers = await getBarbers()
+  const barbers = await getBarbers();
 
   return (
     <section id="equipe" className="py-24 bg-card relative">
       <div className="absolute inset-0 urban-texture" />
-      
+
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section header */}
         <div className="text-center mb-16">
-          <span className="text-primary font-mono text-sm uppercase tracking-widest">Conheca a equipe</span>
+          <span className="text-primary font-mono text-sm uppercase tracking-widest">
+            Conheca a equipe
+          </span>
           <h2 className="text-4xl sm:text-5xl font-bold mt-4 mb-6">
             NOSSOS <span className="text-primary">BARBEIROS</span>
           </h2>
           <p className="text-muted-foreground max-w-xl mx-auto">
-            Profissionais apaixonados pelo que fazem, sempre atualizados 
-            com as ultimas tendencias do mercado.
+            Profissionais apaixonados pelo que fazem, sempre atualizados com as
+            ultimas tendencias do mercado.
           </p>
         </div>
 
@@ -68,7 +80,7 @@ export async function TeamSection() {
               {/* Info */}
               <div className="p-6">
                 <h3 className="text-xl font-bold mb-2">{barber.name}</h3>
-                
+
                 {/* Specialties */}
                 <div className="flex flex-wrap gap-2 mb-4">
                   {barber.specialties?.map((specialty: string) => (
@@ -92,5 +104,5 @@ export async function TeamSection() {
         </div>
       </div>
     </section>
-  )
+  );
 }

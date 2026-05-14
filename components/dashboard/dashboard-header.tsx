@@ -1,32 +1,34 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { createClient } from "@/lib/supabase/client"
-import { Profile } from "@/lib/types"
-import { Button } from "@/components/ui/button"
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
+import { Profile } from "@/lib/types";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Scissors, User, LogOut, Settings, Home } from "lucide-react"
+} from "@/components/ui/dropdown-menu";
+import { Scissors, User, LogOut, Settings, Home } from "lucide-react";
 
 interface DashboardHeaderProps {
-  profile: Profile | null
-  isAdmin: boolean
+  profile: Profile | null;
+  isAdmin: boolean;
 }
 
 export function DashboardHeader({ profile, isAdmin }: DashboardHeaderProps) {
-  const router = useRouter()
+  const router = useRouter();
 
   async function handleSignOut() {
-    const supabase = createClient()
-    await supabase.auth.signOut()
-    router.push("/")
-    router.refresh()
+    const supabase = createClient();
+    if (supabase) {
+      await supabase.auth.signOut();
+    }
+    router.push("/");
+    router.refresh();
   }
 
   return (
@@ -64,26 +66,36 @@ export function DashboardHeader({ profile, isAdmin }: DashboardHeaderProps) {
                   </span>
                 </div>
                 <div className="hidden sm:block text-left">
-                  <p className="text-sm font-medium">{profile?.full_name || "Usuario"}</p>
-                  <p className="text-xs text-muted-foreground capitalize">{profile?.role || "cliente"}</p>
+                  <p className="text-sm font-medium">
+                    {profile?.full_name || "Usuario"}
+                  </p>
+                  <p className="text-xs text-muted-foreground capitalize">
+                    {profile?.role || "cliente"}
+                  </p>
                 </div>
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem asChild>
-                <Link href="/dashboard/perfil" className="flex items-center gap-2">
+                <Link
+                  href="/dashboard/perfil"
+                  className="flex items-center gap-2"
+                >
                   <User className="w-4 h-4" />
                   Meu Perfil
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href="/dashboard/configuracoes" className="flex items-center gap-2">
+                <Link
+                  href="/dashboard/configuracoes"
+                  className="flex items-center gap-2"
+                >
                   <Settings className="w-4 h-4" />
                   Configuracoes
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 onClick={handleSignOut}
                 className="text-destructive focus:text-destructive"
               >
@@ -95,5 +107,5 @@ export function DashboardHeader({ profile, isAdmin }: DashboardHeaderProps) {
         </div>
       </div>
     </header>
-  )
+  );
 }

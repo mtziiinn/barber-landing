@@ -1,51 +1,51 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { createClient } from "@/lib/supabase/client"
-import { Service, Barber, formatPrice } from "@/lib/types"
-import { Button } from "@/components/ui/button"
-import { ServiceStep } from "./service-step"
-import { BarberStep } from "./barber-step"
-import { DateTimeStep } from "./datetime-step"
-import { ConfirmationStep } from "./confirmation-step"
-import { Check, Loader2 } from "lucide-react"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
+import { Service, Barber, formatPrice } from "@/lib/types";
+import { Button } from "@/components/ui/button";
+import { ServiceStep } from "./service-step";
+import { BarberStep } from "./barber-step";
+import { DateTimeStep } from "./datetime-step";
+import { ConfirmationStep } from "./confirmation-step";
+import { Check, Loader2 } from "lucide-react";
 
 interface BookingFlowProps {
-  services: Service[]
-  barbers: Barber[]
-  userId: string
+  services: Service[];
+  barbers: Barber[];
+  userId: string;
 }
 
-type Step = "service" | "barber" | "datetime" | "confirmation"
+type Step = "service" | "barber" | "datetime" | "confirmation";
 
 export function BookingFlow({ services, barbers, userId }: BookingFlowProps) {
-  const router = useRouter()
-  const [currentStep, setCurrentStep] = useState<Step>("service")
-  const [selectedService, setSelectedService] = useState<Service | null>(null)
-  const [selectedBarber, setSelectedBarber] = useState<Barber | null>(null)
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
-  const [selectedTime, setSelectedTime] = useState<string | null>(null)
-  const [paymentMethod, setPaymentMethod] = useState<"online" | "cash">("cash")
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const router = useRouter();
+  const [currentStep, setCurrentStep] = useState<Step>("service");
+  const [selectedService, setSelectedService] = useState<Service | null>(null);
+  const [selectedBarber, setSelectedBarber] = useState<Barber | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<"online" | "cash">("cash");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const steps: { key: Step; label: string }[] = [
     { key: "service", label: "Servico" },
     { key: "barber", label: "Barbeiro" },
     { key: "datetime", label: "Data/Hora" },
     { key: "confirmation", label: "Confirmacao" },
-  ]
+  ];
 
-  const currentStepIndex = steps.findIndex((s) => s.key === currentStep)
+  const currentStepIndex = steps.findIndex((s) => s.key === currentStep);
 
   async function handleConfirm() {
     if (!selectedService || !selectedBarber || !selectedDate || !selectedTime) {
-      return
+      return;
     }
 
-    setLoading(true)
-    setError(null)
+    setLoading(true);
+    setError(null);
 
     try {
       if (paymentMethod === "online") {
@@ -59,36 +59,40 @@ export function BookingFlow({ services, barbers, userId }: BookingFlowProps) {
             date: selectedDate.toISOString().split("T")[0],
             time: selectedTime,
           }),
-        })
+        });
 
-        const data = await response.json()
+        const data = await response.json();
 
         if (data.url) {
-          window.location.href = data.url
-          return
+          window.location.href = data.url;
+          return;
         }
       }
 
       // Create appointment directly for cash payment
-      const supabase = createClient()
-      const { error: insertError } = await supabase.from("appointments").insert({
-        client_id: userId,
-        service_id: selectedService.id,
-        barber_id: selectedBarber.id,
-        appointment_date: selectedDate.toISOString().split("T")[0],
-        appointment_time: selectedTime,
-        status: "pending",
-        payment_status: "pending",
-      })
+      const supabase = createClient();
+      if (!supabase) throw new Error("Erro de configuração do banco");
+
+      const { error: insertError } = await supabase
+        .from("appointments")
+        .insert({
+          client_id: userId,
+          service_id: selectedService.id,
+          barber_id: selectedBarber.id,
+          appointment_date: selectedDate.toISOString().split("T")[0],
+          appointment_time: selectedTime,
+          status: "pending",
+          payment_status: "pending",
+        });
 
       if (insertError) {
-        throw insertError
+        throw insertError;
       }
 
-      router.push("/dashboard?booking=success")
+      router.push("/dashboard?booking=success");
     } catch (err) {
-      setError("Erro ao criar agendamento. Tente novamente.")
-      setLoading(false)
+      setError("Erro ao criar agendamento. Tente novamente.");
+      setLoading(false);
     }
   }
 
@@ -104,8 +108,8 @@ export function BookingFlow({ services, barbers, userId }: BookingFlowProps) {
                   index < currentStepIndex
                     ? "bg-primary text-primary-foreground"
                     : index === currentStepIndex
-                    ? "bg-primary text-primary-foreground neon-border"
-                    : "bg-muted text-muted-foreground"
+                      ? "bg-primary text-primary-foreground neon-border"
+                      : "bg-muted text-muted-foreground"
                 }`}
               >
                 {index < currentStepIndex ? (
@@ -116,7 +120,9 @@ export function BookingFlow({ services, barbers, userId }: BookingFlowProps) {
               </div>
               <span
                 className={`text-xs mt-2 whitespace-nowrap ${
-                  index <= currentStepIndex ? "text-foreground" : "text-muted-foreground"
+                  index <= currentStepIndex
+                    ? "text-foreground"
+                    : "text-muted-foreground"
                 }`}
               >
                 {step.label}
@@ -140,8 +146,8 @@ export function BookingFlow({ services, barbers, userId }: BookingFlowProps) {
             services={services}
             selectedService={selectedService}
             onSelect={(service) => {
-              setSelectedService(service)
-              setCurrentStep("barber")
+              setSelectedService(service);
+              setCurrentStep("barber");
             }}
           />
         )}
@@ -151,8 +157,8 @@ export function BookingFlow({ services, barbers, userId }: BookingFlowProps) {
             barbers={barbers}
             selectedBarber={selectedBarber}
             onSelect={(barber) => {
-              setSelectedBarber(barber)
-              setCurrentStep("datetime")
+              setSelectedBarber(barber);
+              setCurrentStep("datetime");
             }}
             onBack={() => setCurrentStep("service")}
           />
@@ -170,21 +176,25 @@ export function BookingFlow({ services, barbers, userId }: BookingFlowProps) {
           />
         )}
 
-        {currentStep === "confirmation" && selectedService && selectedBarber && selectedDate && selectedTime && (
-          <ConfirmationStep
-            service={selectedService}
-            barber={selectedBarber}
-            date={selectedDate}
-            time={selectedTime}
-            paymentMethod={paymentMethod}
-            onPaymentMethodChange={setPaymentMethod}
-            onBack={() => setCurrentStep("datetime")}
-            onConfirm={handleConfirm}
-            loading={loading}
-            error={error}
-          />
-        )}
+        {currentStep === "confirmation" &&
+          selectedService &&
+          selectedBarber &&
+          selectedDate &&
+          selectedTime && (
+            <ConfirmationStep
+              service={selectedService}
+              barber={selectedBarber}
+              date={selectedDate}
+              time={selectedTime}
+              paymentMethod={paymentMethod}
+              onPaymentMethodChange={setPaymentMethod}
+              onBack={() => setCurrentStep("datetime")}
+              onConfirm={handleConfirm}
+              loading={loading}
+              error={error}
+            />
+          )}
       </div>
     </div>
-  )
+  );
 }

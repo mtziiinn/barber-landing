@@ -28,11 +28,13 @@ export default async function CheckoutSuccessPage({
     try {
       const supabase = await createClient();
 
-      // Update appointment payment status
-      await supabase
-        .from("appointments")
-        .update({ payment_status: "paid_online" })
-        .eq("id", appointmentId);
+      if (supabase) {
+        // Update appointment payment status
+        await supabase
+          .from("appointments")
+          .update({ payment_status: "paid_online" })
+          .eq("id", appointmentId);
+      }
 
       // You could also create a payment record here if needed
     } catch (error) {
