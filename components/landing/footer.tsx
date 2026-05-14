@@ -1,5 +1,5 @@
-import Link from "next/link"
-import { Scissors, Instagram, Facebook, Twitter } from "lucide-react"
+import Link from "next/link";
+import { Scissors, Instagram, Facebook, Twitter } from "lucide-react";
 
 export function Footer() {
   return (
@@ -17,18 +17,27 @@ export function Footer() {
               </span>
             </Link>
             <p className="text-muted-foreground text-sm max-w-md mb-4">
-              A barbearia mais estilosa da cidade. Cortes modernos, ambiente 
+              A barbearia mais estilosa da cidade. Cortes modernos, ambiente
               descontraido e atendimento de primeira.
             </p>
             {/* Social */}
             <div className="flex items-center gap-4">
-              <a href="#" className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-colors">
+              <a
+                href="#"
+                className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-colors"
+              >
                 <Instagram className="w-5 h-5" />
               </a>
-              <a href="#" className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-colors">
+              <a
+                href="#"
+                className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-colors"
+              >
                 <Facebook className="w-5 h-5" />
               </a>
-              <a href="#" className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-colors">
+              <a
+                href="#"
+                className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-colors"
+              >
                 <Twitter className="w-5 h-5" />
               </a>
             </div>
@@ -39,22 +48,34 @@ export function Footer() {
             <h4 className="font-bold mb-4">Links Rapidos</h4>
             <ul className="space-y-2">
               <li>
-                <a href="#servicos" className="text-muted-foreground hover:text-primary transition-colors text-sm">
+                <a
+                  href="#servicos"
+                  className="text-muted-foreground hover:text-primary transition-colors text-sm"
+                >
                   Servicos
                 </a>
               </li>
               <li>
-                <a href="#equipe" className="text-muted-foreground hover:text-primary transition-colors text-sm">
+                <a
+                  href="#equipe"
+                  className="text-muted-foreground hover:text-primary transition-colors text-sm"
+                >
                   Equipe
                 </a>
               </li>
               <li>
-                <a href="#localizacao" className="text-muted-foreground hover:text-primary transition-colors text-sm">
+                <a
+                  href="#localizacao"
+                  className="text-muted-foreground hover:text-primary transition-colors text-sm"
+                >
                   Localizacao
                 </a>
               </li>
               <li>
-                <Link href="/agendar" className="text-muted-foreground hover:text-primary transition-colors text-sm">
+                <Link
+                  href="/agendar"
+                  className="text-muted-foreground hover:text-primary transition-colors text-sm"
+                >
                   Agendar
                 </Link>
               </li>
@@ -66,17 +87,26 @@ export function Footer() {
             <h4 className="font-bold mb-4">Conta</h4>
             <ul className="space-y-2">
               <li>
-                <Link href="/auth/login" className="text-muted-foreground hover:text-primary transition-colors text-sm">
+                <Link
+                  href="/auth/login"
+                  className="text-muted-foreground hover:text-primary transition-colors text-sm"
+                >
                   Entrar
                 </Link>
               </li>
               <li>
-                <Link href="/auth/sign-up" className="text-muted-foreground hover:text-primary transition-colors text-sm">
+                <Link
+                  href="/auth/sign-up"
+                  className="text-muted-foreground hover:text-primary transition-colors text-sm"
+                >
                   Criar Conta
                 </Link>
               </li>
               <li>
-                <Link href="/dashboard" className="text-muted-foreground hover:text-primary transition-colors text-sm">
+                <Link
+                  href="/dashboard"
+                  className="text-muted-foreground hover:text-primary transition-colors text-sm"
+                >
                   Dashboard
                 </Link>
               </li>
@@ -87,18 +117,25 @@ export function Footer() {
         {/* Bottom */}
         <div className="pt-8 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-muted-foreground text-sm">
-            &copy; {new Date().getFullYear()} FadeZone. Todos os direitos reservados.
+            &copy; {new Date().getFullYear()} FadeZone. Todos os direitos
+            reservados.
           </p>
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <a href="#" className="hover:text-primary transition-colors">
+            <Link
+              href="/privacidade"
+              className="hover:text-primary transition-colors"
+            >
               Privacidade
-            </a>
-            <a href="#" className="hover:text-primary transition-colors">
+            </Link>
+            <Link
+              href="/termos"
+              className="hover:text-primary transition-colors"
+            >
               Termos
-            </a>
+            </Link>
           </div>
         </div>
       </div>
     </footer>
-  )
+  );
 }
