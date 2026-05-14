@@ -183,7 +183,7 @@ export default function ClientsPage() {
                   Novo Cliente
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px] bg-card border-border">
+              <DialogContent className="sm:max-w-106.25 bg-card border-border">
                 <form onSubmit={handleCreateClient}>
                   <DialogHeader>
                     <DialogTitle>Cadastrar Novo Cliente</DialogTitle>

@@ -173,7 +173,7 @@ export default function ReportsPage() {
               Gráfico de evolução de vendas e agendamentos (Em breve)
             </CardDescription>
           </CardHeader>
-          <CardContent className="h-[300px] flex items-center justify-center border-t border-border/50">
+          <CardContent className="h-75 flex items-center justify-center border-t border-border/50">
             <div className="text-center">
               <BarChart3 className="w-12 h-12 text-muted-foreground/20 mx-auto mb-4" />
               <p className="text-muted-foreground">
