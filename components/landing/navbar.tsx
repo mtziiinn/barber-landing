@@ -1,12 +1,26 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Menu, X, Scissors } from "lucide-react"
+import Link from "next/link";
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Menu, X, Scissors, LayoutDashboard } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 
 export function Navbar() {
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const supabase = createClient();
+
+  useEffect(() => {
+    async function getUser() {
+      if (!supabase) return;
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setUser(user);
+    }
+    getUser();
+  }, []);
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
@@ -24,37 +38,48 @@ export function Navbar() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
-            <a href="#servicos" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+            <a
+              href="#servicos"
+              className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+            >
               Servicos
             </a>
-            <a href="#equipe" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+            <a
+              href="#equipe"
+              className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+            >
               Equipe
             </a>
-            <a href="#localizacao" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+            <a
+              href="#localizacao"
+              className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+            >
               Localizacao
             </a>
           </div>
 
           {/* CTA Buttons */}
           <div className="hidden md:flex items-center gap-3">
-            <Button variant="ghost" asChild>
-              <Link href="/auth/login">Entrar</Link>
-            </Button>
+            {!user ? (
+              <Button variant="ghost" asChild>
+                <Link href="/auth/login">Entrar</Link>
+              </Button>
+            ) : (
+              <Button variant="ghost" asChild>
+                <Link href="/dashboard" className="flex items-center gap-2">
+                  <LayoutDashboard className="w-4 h-4" />
+                  Dashboard
+                </Link>
+              </Button>
+            )}
             <Button asChild className="neon-border">
               <Link href="/agendar">Agendar</Link>
             </Button>
           </div>
 
           {/* Mobile Menu Button */}
-          <button
-            className="md:hidden p-2"
-            onClick={() => setIsOpen(!isOpen)}
-          >
-            {isOpen ? (
-              <X className="w-6 h-6" />
-            ) : (
-              <Menu className="w-6 h-6" />
-            )}
+          <button className="md:hidden p-2" onClick={() => setIsOpen(!isOpen)}>
+            {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
 
@@ -84,9 +109,18 @@ export function Navbar() {
                 Localizacao
               </a>
               <div className="flex flex-col gap-2 pt-4 border-t border-border">
-                <Button variant="ghost" asChild className="justify-start">
-                  <Link href="/auth/login">Entrar</Link>
-                </Button>
+                {!user ? (
+                  <Button variant="ghost" asChild className="justify-start">
+                    <Link href="/auth/login">Entrar</Link>
+                  </Button>
+                ) : (
+                  <Button variant="ghost" asChild className="justify-start">
+                    <Link href="/dashboard" className="flex items-center gap-2">
+                      <LayoutDashboard className="w-4 h-4" />
+                      Dashboard
+                    </Link>
+                  </Button>
+                )}
                 <Button asChild className="neon-border">
                   <Link href="/agendar">Agendar Horario</Link>
                 </Button>
@@ -96,5 +130,5 @@ export function Navbar() {
         )}
       </div>
     </nav>
-  )
+  );
 }
